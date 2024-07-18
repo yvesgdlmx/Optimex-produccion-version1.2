@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import clienteAxios from "../config/clienteAxios";
 import { Link } from "react-router-dom";
 
-const GeneradoresProcesos = () => {
+const LensLogProcesos = () => {
     const [totalHits, setTotalHits] = useState(0);
     const [ultimaHora, setUltimaHora] = useState("");
     const [siguienteHora, setSiguienteHora] = useState("");
@@ -17,13 +17,21 @@ const GeneradoresProcesos = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Obtener la suma de metas de los generadores
-                const responseMetas = await clienteAxios.get('/metas/metas-generadores');
-                const sumaMetas = responseMetas.data.registros.reduce((acc, curr) => acc + curr.meta, 0);
+                // Obtener la meta específica de Lens Log
+                const responseMetas = await clienteAxios.get('/metas/metas-manuales');
+                const metasLensLog = responseMetas.data.registros.filter(registro => registro.name.includes('LENS LOG'));
+                const sumaMetas = metasLensLog.reduce((acc, curr) => acc + curr.meta, 0);
+                console.log("Suma de metas (Lens Log):", sumaMetas);
 
-                // Obtener registros del día actual y calcular total de hits
-                const responseRegistros = await clienteAxios.get('/generadores/generadores/actualdia');
-                const registros = responseRegistros.data.registros;
+                // Obtener registros del día actual
+                const responseRegistros = await clienteAxios.get('/manual/manual/actualdia');
+                console.log("Registros obtenidos:", responseRegistros.data.registros);
+
+                // Filtrar solo los registros que contienen "LENS LOG" en el campo `name`
+                const registros = responseRegistros.data.registros.filter(registro => {
+                    return registro.name.includes('LENS LOG');
+                });
+                console.log("Registros filtrados (LENS LOG):", registros);
 
                 // Filtrar registros entre las 06:30 y las 23:00
                 const horaInicio = new Date('1970/01/01 06:30:00');
@@ -32,9 +40,12 @@ const GeneradoresProcesos = () => {
                     const horaRegistro = new Date('1970/01/01 ' + registro.hour);
                     return horaRegistro >= horaInicio && horaRegistro <= horaFin;
                 });
+                console.log("Registros filtrados por hora:", registrosFiltrados);
 
+                // Calcular hits totales
                 const total = registrosFiltrados.reduce((acc, curr) => acc + parseInt(curr.hits, 10), 0);
                 setTotalHits(total);
+                console.log("Total hits:", total);
 
                 // Determinar la hora más cercana y la siguiente hora
                 const ahora = new Date();
@@ -47,44 +58,41 @@ const GeneradoresProcesos = () => {
                         diferenciaMasCercana = diferencia;
                     }
                 });
-
                 const formattedLastHour = new Date('1970/01/01 ' + horaMasCercana);
                 setUltimaHora(`${formattedLastHour.getHours().toString().padStart(2, '0')}:${formattedLastHour.getMinutes().toString().padStart(2, '0')}`);
+                console.log("Última hora:", ultimaHora);
                 const horaFinal = new Date('1970/01/01 ' + horaMasCercana);
-
                 // Redondear la hora final a la media hora más cercana
                 horaFinal.setMinutes(horaFinal.getMinutes() + 30 - (horaFinal.getMinutes() % 30));
                 const horasTranscurridas = (horaFinal - horaInicio) / (1000 * 60 * 60);
                 setMeta(Math.round(horasTranscurridas) * sumaMetas);
+                console.log("Meta calculada:", meta);
 
                 // Configurar la siguiente hora
                 const siguienteHoraDate = new Date(horaFinal.getTime());
                 siguienteHoraDate.setMinutes(siguienteHoraDate.getMinutes() + 30);
                 setSiguienteHora(`${siguienteHoraDate.getHours().toString().padStart(2, '0')}:${siguienteHoraDate.getMinutes().toString().padStart(2, '0')}`);
+                console.log("Siguiente hora:", siguienteHora);
 
                 // Calcular hits por turno
                 const horaMatutinoInicio = new Date('1970/01/01 06:30:00');
                 const horaMatutinoFin = new Date('1970/01/01 14:30:00');
                 const horaVespertinoInicio = new Date('1970/01/01 14:30:00');
                 const horaVespertinoFin = new Date('1970/01/01 21:30:00');
-                const horaNocturnoInicio = new Date('1970/01/01 19:30:00');
-                const horaNocturnoFin = new Date('1970/01/02 01:30:00'); // Note the change to the next day
-
+                const horaNocturnoInicio = new Date('1970/01/01 21:30:00');
+                const horaNocturnoFin = new Date('1970/01/01 23:59:59');
                 const hitsMatutino = registrosFiltrados.filter(registro => {
                     const horaRegistro = new Date('1970/01/01 ' + registro.hour);
                     return horaRegistro >= horaMatutinoInicio && horaRegistro < horaMatutinoFin;
                 }).reduce((acc, curr) => acc + parseInt(curr.hits, 10), 0);
-
                 const hitsVespertino = registrosFiltrados.filter(registro => {
                     const horaRegistro = new Date('1970/01/01 ' + registro.hour);
                     return horaRegistro >= horaVespertinoInicio && horaRegistro < horaVespertinoFin;
                 }).reduce((acc, curr) => acc + parseInt(curr.hits, 10), 0);
-
                 const hitsNocturno = registrosFiltrados.filter(registro => {
                     const horaRegistro = new Date('1970/01/01 ' + registro.hour);
-                    return (horaRegistro >= horaNocturnoInicio && horaRegistro < horaNocturnoFin);
+                    return horaRegistro >= horaNocturnoInicio;
                 }).reduce((acc, curr) => acc + parseInt(curr.hits, 10), 0);
-
                 setHitsMatutino(hitsMatutino);
                 setHitsVespertino(hitsVespertino);
                 setHitsNocturno(hitsNocturno);
@@ -93,7 +101,6 @@ const GeneradoresProcesos = () => {
                 const horasMatutino = 8; // 8 horas para el turno matutino
                 const horasVespertino = 7; // 7 horas para el turno vespertino
                 const horasNocturno = 6; // 6 horas para el turno nocturno
-
                 setMetaMatutino(horasMatutino * sumaMetas);
                 setMetaVespertino(horasVespertino * sumaMetas);
                 setMetaNocturno(horasNocturno * sumaMetas);
@@ -113,10 +120,10 @@ const GeneradoresProcesos = () => {
 
     return (
         <>
-            <Link className="link" to={'/procesos-horas#generadores'}>
+            <Link className="link" to={'/procesos-horas'}>
                 <div className="procesos-2">
                     <div className="procesos-2__flex">
-                        <p className="procesos-2__p-azul">Generado</p>
+                        <p className="procesos-2__p-azul">Lens-Log</p>
                         <p className="procesos-2__p">Trabajos: <br /><span className={meta > totalHits ? `procesos__span-2 generadores__uncheck` : `procesos__span-2 generadores__check`}>{totalHits}</span></p>
                         <p className="procesos-2__p">Meta: <br /><span className="procesos-2__span">{meta}</span></p>
                         <p className="procesos-2__p">Último Registro: <br /><span className="procesos-2__span">{ultimaHora} - {siguienteHora}</span></p>
@@ -130,4 +137,4 @@ const GeneradoresProcesos = () => {
     );
 };
 
-export default GeneradoresProcesos;
+export default LensLogProcesos;

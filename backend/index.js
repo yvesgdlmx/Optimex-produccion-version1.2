@@ -14,7 +14,10 @@ import metaPulidosRoutes from './routes/metaPulidosRoutes.js'
 import metaEngraversRoutes from './routes/metaEngraversRoutes.js'
 import metaTerminadosRoutes from './routes/metaTerminadosRoutes.js'
 import metaBiseladosRoutes from './routes/metaBiseladosRoutes.js'
+import metaManualesRoutes from './routes/metaManualesRoutes.js'
 import usuarioRoutes from './routes/usuarioRoutes.js'
+import manualRoutes  from './routes/manualRoutes.js'
+import historialRoutes from './routes/historialRoutes.js'
 
 const app = express();
 app.use(express.json());
@@ -54,6 +57,8 @@ app.use("/api/pulido", pulidoRoutes);
 app.use("/api/engraver", engraverRoutes);
 app.use("/api/terminado", bloqueoTerminadoRoutes);
 app.use("/api/biselado", biseladoRoutes);
+app.use("/api/manual", manualRoutes);
+app.use("/api/historial", historialRoutes);
 /* Rutas de meta */
 app.use("/api/metas", metaRoutes);
 app.use("/api/metas", metaTalladosRoutes);
@@ -62,6 +67,7 @@ app.use("/api/metas", metaPulidosRoutes);
 app.use("/api/metas", metaEngraversRoutes);
 app.use("/api/metas", metaTerminadosRoutes);
 app.use("/api/metas", metaBiseladosRoutes);
+app.use("/api/metas", metaManualesRoutes);
 /* Rutas de autenticación */
 app.use('/api/login', usuarioRoutes)
 

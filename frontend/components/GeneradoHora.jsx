@@ -5,17 +5,17 @@ import formatearHora from "../helpers/formatearHora";
 
 const GeneradoHora = () => {
     const [registros, setRegistros] = useState([]);
-    const [anio, setAnio] = useState();
-    const [mes, setMes] = useState();
-    const [dia, setDia] = useState();
-    const [meta, setMeta] = useState(0); // Cambiado para usar un solo state de meta
-
+    const [meta, setMeta] = useState(0);
+    const [totalesPorTurno, setTotalesPorTurno] = useState({
+        matutino: 0,
+        vespertino: 0,
+        nocturno: 0
+    });
     const location = useLocation();
 
     useEffect(() => {
         const obtenerMeta = async () => {
             const { data } = await clienteAxios(`/metas/metas-generadores`);
-            // Asumiendo que data.registros es un array de objetos como describiste
             const sumaMetas = data.registros.reduce((acc, registro) => acc + registro.meta, 0);
             setMeta(sumaMetas);
         };
@@ -23,22 +23,18 @@ const GeneradoHora = () => {
     }, []);
 
     useEffect(() => {
-        const obtenerFechaActual = () => {
-            const fechaActual = new Date();
-            const ano = fechaActual.getFullYear();
-            const mes = (fechaActual.getMonth() + 1).toString().padStart(2, '0');
-            const dia = fechaActual.getDate().toString().padStart(2, '0');
-            setAnio(ano);
-            setMes(mes);
-            setDia(dia);
-        };
-        obtenerFechaActual();
-    }, []);
-
-    useEffect(() => {
         const obtenerRegistros = async () => {
             const { data } = await clienteAxios(`/generadores/generadores/actualdia`);
-            setRegistros(data.registros);
+            
+            // Filtrar los registros que están entre las 06:30 y las 23:00
+            const registrosFiltrados = data.registros.filter(registro => {
+                const [hora, minuto] = registro.hour.split(':').map(Number);
+                const minutosTotales = hora * 60 + minuto;
+                return minutosTotales >= 390 && minutosTotales < 1380; // 06:30 = 390 minutos, 23:00 = 1380 minutos
+            });
+
+            setRegistros(registrosFiltrados);
+            calcularTotalesPorTurno(registrosFiltrados);
         };
         obtenerRegistros();
     }, []);
@@ -54,8 +50,7 @@ const GeneradoHora = () => {
 
     const agruparHitsPorHora = () => {
         const hitsPorHora = {};
-        const registrosFiltrados = registros.filter(registro => registro.hour >= '06:30:00' && registro.hour < '23:30:00');
-        registrosFiltrados.forEach((registro) => {
+        registros.forEach((registro) => {
             const hora = registro.hour;
             if (hitsPorHora[hora]) {
                 hitsPorHora[hora] += registro.hits;
@@ -64,6 +59,26 @@ const GeneradoHora = () => {
             }
         });
         return hitsPorHora;
+    };
+
+    const calcularTotalesPorTurno = (registros) => {
+        const totales = {
+            matutino: 0,
+            vespertino: 0,
+            nocturno: 0
+        };
+        registros.forEach(registro => {
+            const [hora, minuto] = registro.hour.split(':').map(Number);
+            const minutosTotales = hora * 60 + minuto;
+            if (minutosTotales >= 390 && minutosTotales < 870) { // 06:30 - 14:30
+                totales.matutino += registro.hits;
+            } else if (minutosTotales >= 870 && minutosTotales < 1290) { // 14:30 - 21:30
+                totales.vespertino += registro.hits;
+            } else if (minutosTotales >= 1290 && minutosTotales < 1380) { // 21:30 - 23:00
+                totales.nocturno += registro.hits;
+            }
+        });
+        setTotalesPorTurno(totales);
     };
 
     const hitsPorHora = agruparHitsPorHora();
@@ -88,7 +103,7 @@ const GeneradoHora = () => {
                         <tr className="tabla__tr">
                             <th className="tabla__th"></th>
                             {horasOrdenadas.map((hora) => (
-                                <th key={hora} className="tabla__th">{calcularRangoHoras(formatearHoraSinSegundos(hora))}</th>
+                                <th key={hora} className="tabla__th">{calcularRangoHoras(formatearHora(hora))}</th>
                             ))}
                         </tr>
                     </thead>
@@ -106,6 +121,17 @@ const GeneradoHora = () => {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <div className='tabla__div'>
+                <div className='tabla__campo'>
+                    <p className='tabla__p'>Total Matutino: <span className='tabla__span'>{totalesPorTurno.matutino}</span></p>
+                </div>
+                <div className='tabla__campo'>
+                    <p className='tabla__p'>Total Vespertino: <span className='tabla__span'>{totalesPorTurno.vespertino}</span></p>
+                </div>
+                <div className='tabla__campo'>
+                    <p className='tabla__p'>Total Nocturno: <span className='tabla__span'>{totalesPorTurno.nocturno}</span></p>
+                </div>
             </div>
         </>
     );

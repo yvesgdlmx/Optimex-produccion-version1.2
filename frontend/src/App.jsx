@@ -12,6 +12,9 @@ import TalladosHora from '../paginas/TalladosHora';
 import EngraversHoras from '../paginas/EngraversHoras';
 import TerminadosHoras from '../paginas/TerminadosHoras';
 import BiseladorasHoras from '../paginas/BiseladorasHoras';
+import ManualesHoras from '../paginas/ManualesHoras';
+import LensLogHoras from '../paginas/LensLogHoras';
+import JobCompletesHoras from '../paginas/JobCompletesHoras';
 /* Metas */
 import Metas from '../paginas/Metas';
 import BloqueoTallado from '../paginas/metas/BloqueoTallado';
@@ -21,6 +24,7 @@ import Pulidoras from '../paginas/metas/Pulidoras';
 import Engraver from '../paginas/metas/Engraver';
 import BloqueoTerminado from '../paginas/metas/BloqueoTerminado';
 import Biseladoras from '../paginas/metas/Biseladoras';
+import Manuales from '../paginas/metas/Manuales';
 /*Ediciones de metas*/
 import EditarTallado from '../paginas/metas/EditarTallado';
 import EditarMeta from '../paginas/metas/EditarMeta';
@@ -35,6 +39,10 @@ import Tableros from '../paginas/tableros/Tableros';
 import TablerosTallado from '../paginas/tableros/TablerosTallado';
 import TablerosTerminado from '../paginas/tableros/TablerosTerminado';
 import TablerosTalladoTerminado from '../paginas/tableros/TablerosTalladoTerminado';
+
+/* Historial */
+import HistorialPorHora from '../paginas/historial/HistorialPorHora';
+import HistorialPorTurnos from '../paginas/historial/HistorialPorTurnos';
 
 /* Auth */
 import Login from '../paginas/Login';
@@ -58,6 +66,9 @@ function App() {
                       <Route path='/engravers-horas' element={<EngraversHoras/>} />
                       <Route path='/terminados-horas' element={<TerminadosHoras/>} />
                       <Route path='/biselados-horas' element={<BiseladorasHoras/>} />
+                      <Route path='/lenslog-horas' element={<LensLogHoras/>} />
+                      <Route path='/jobcomplete-horas' element={<JobCompletesHoras/>} />
+                      <Route path='/manuales-horas' element={<ManualesHoras/>} />
                       <Route path='/generado-maquina/:anio/:mes/:dia/:hora' element={<GeneradoMaquina/>} />
                       <Route path='/metas' element={<Metas/>} />
                       <Route path='/meta-tallado' element={<BloqueoTallado/>} />
@@ -66,6 +77,7 @@ function App() {
                       <Route path='/meta-engraver' element={<Engraver/>} />
                       <Route path='/meta-terminado' element={<BloqueoTerminado/>} />
                       <Route path='/meta-biselado' element={<Biseladoras/>} />
+                      <Route path='/meta-manual' element={<Manuales/>} />
                       <Route path='/editar-meta/:id' element={<EditarMeta/>} />
                       <Route path='/editar-tallado/:id' element={<EditarTallado/>} />
                       <Route path='/editar-pulido/:id' element={<EditarPulido/>} />
@@ -79,6 +91,8 @@ function App() {
                       <Route path='/tableros-tallado' element={<TablerosTallado/>} />
                       <Route path='/tableros-terminado' element= {<TablerosTerminado/>} />
                       <Route path='/tableros-tallado&terminado' element={<TablerosTalladoTerminado/>}/>
+                      <Route path='/historial' element={<HistorialPorHora/>} />
+                      <Route path='/historial-turnos' element={<HistorialPorTurnos/>} />
                   </Route>
                   <Route path='/auth' element={<AuthLayout/>}>
                     <Route index element={<Login/>}/>

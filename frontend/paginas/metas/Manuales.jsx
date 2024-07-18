@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom';
 import clienteAxios from '../../config/clienteAxios'
 
-const Generadores2 = () => {
+const Manuales = () => {
 
 const [metas, setMetas] = useState([]);
 const [totalMetas, setTotalMetas] = useState(0);
@@ -10,7 +10,7 @@ const [totalMetas, setTotalMetas] = useState(0);
 useEffect(() => {
     const obtenerMetas = async () => {
         try {
-            const response = await clienteAxios.get('/metas/metas-generadores');
+            const response = await clienteAxios.get('/metas/metas-manuales');
             const metasObtenidas = response.data.registros;
             setMetas(metasObtenidas);
             const totalMetas = metasObtenidas.reduce((acc, meta) => acc + meta.meta, 0);
@@ -27,7 +27,7 @@ console.log(totalMetas)
 
   return (
     <>
-    <h1 className="heading">Meta de generadores</h1>
+    <h1 className="heading">Meta De Estaciones Manuales</h1>
     <div className='metas-modulo'>
         <div className='metas-modulo__contenedor'>
             <table className='tabla'>
@@ -44,7 +44,7 @@ console.log(totalMetas)
                             <td className='tabla__td text-transform'>{meta.name}</td>
                             <td className='tabla__td'>{meta.meta}</td>
                             <td className='tabla__td'>
-                                <Link to={`/editar-meta/${meta.id}`}>
+                                <Link to={`/editar-biselado/${meta.id}`}>
                                     <input type="text" value='editar' className='tabla__boton'/>
                                 </Link>
                             </td>
@@ -61,4 +61,4 @@ console.log(totalMetas)
   )
 }
 
-export default Generadores2
+export default Manuales

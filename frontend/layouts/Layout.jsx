@@ -32,7 +32,7 @@ const Layout = () => {
             )}
           </div>
           <div className='header__campo-version'>
-            <p className='header__version'>Versión 1.2</p>
+            <p className='header__version'>Versión 2.0</p>
           </div>
         </div>
       </header>
@@ -57,6 +57,12 @@ const Layout = () => {
               <div className='sidebar__campo'>
                 <img className='sidebar__logo' src="../../img/Tableros.png" alt="" width={40}/>
                 <p className='sidebar__texto'>Tableros</p>
+              </div>
+            </Link>
+            <Link to='/historial-turnos' className={location.pathname === '/historial-turnos' ? 'sidebar__link sidebar__link-activo' : 'sidebar__link'}>
+              <div className='sidebar__campo'>
+                <img className='sidebar__logo' src="../../img/history.png" alt="" width={40}/>
+                <p className='sidebar__texto'>Historial</p>
               </div>
             </Link>
           </nav>

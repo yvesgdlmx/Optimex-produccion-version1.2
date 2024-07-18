@@ -17,7 +17,7 @@ const AuthLayout = () => {
           <p className='header__titulo'>Inteligencia de negocios</p>
         </div>
         <div className='header__campo-version'>
-          <p className='header__version'>Versión 1.2</p>
+          <p className='header__version'>Versión 2.0</p>
         </div>
       </div>
     </header>

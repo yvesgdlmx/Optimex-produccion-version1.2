@@ -37,6 +37,11 @@ const Metas = () => {
                     <h2 className="meta__h2">Biseladoras</h2>
                 </div>
             </Link>
+            <Link to={'/meta-manual'}>
+                <div className="meta__campo">
+                    <h2 className="meta__h2">Estaciones Manuales</h2>
+                </div>
+            </Link>
         </div>
     </div>
     </>

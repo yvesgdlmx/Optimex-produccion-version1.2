@@ -3,7 +3,7 @@ import clienteAxios from "../config/clienteAxios";
 import { Link, useLocation } from "react-router-dom";
 import formatearHora from "../helpers/formatearHora";
 
-const BiseladoHora = () => {
+const LensLogHora = () => {
     const [registros, setRegistros] = useState([]);
     const [meta, setMeta] = useState(0);
     const [totalesPorTurno, setTotalesPorTurno] = useState({
@@ -15,8 +15,9 @@ const BiseladoHora = () => {
 
     useEffect(() => {
         const obtenerMeta = async () => {
-            const { data } = await clienteAxios(`/metas/metas-biselados`);
-            const sumaMetas = data.registros.reduce((acc, registro) => acc + registro.meta, 0);
+            const { data } = await clienteAxios(`/metas/metas-manuales`);
+            const metasLensLog = data.registros.filter(registro => registro.name.includes('LENS LOG'));
+            const sumaMetas = metasLensLog.reduce((acc, registro) => acc + registro.meta, 0);
             setMeta(sumaMetas);
         };
         obtenerMeta();
@@ -24,10 +25,11 @@ const BiseladoHora = () => {
 
     useEffect(() => {
         const obtenerRegistros = async () => {
-            const { data } = await clienteAxios(`/biselado/biselado/actualdia`);
+            const { data } = await clienteAxios(`/manual/manual/actualdia`);
+            const registrosLensLog = data.registros.filter(registro => registro.name.includes('LENS LOG'));
             
             // Filtrar los registros que están entre las 06:30 y las 23:00
-            const registrosFiltrados = data.registros.filter(registro => {
+            const registrosFiltrados = registrosLensLog.filter(registro => {
                 const [hora, minuto] = registro.hour.split(':').map(Number);
                 const minutosTotales = hora * 60 + minuto;
                 return minutosTotales >= 390 && minutosTotales < 1380; // 06:30 = 390 minutos, 23:00 = 1380 minutos
@@ -97,7 +99,7 @@ const BiseladoHora = () => {
 
     return (
         <>
-            <div className="generado-hora" id="biselados">
+            <div className="generado-hora" id="lenslog">
                 <table className="tabla">
                     <thead className="tabla__thead">
                         <tr className="tabla__tr">
@@ -109,10 +111,10 @@ const BiseladoHora = () => {
                     </thead>
                     <tbody>
                         <tr className="tabla__tr">
-                            <Link to={'/biselados-horas'} className="link__tabla">
+                            <Link to={'/lenslog-horas'} className="link__tabla">
                                 <div className="tabla__th-flex">
                                     <img src="./img/ver.png" alt="imagen-ver" className="tabla__ver" />
-                                    <td className="tabla__td position">Biselado <br/> <span className="tabla__td-span">Meta: <span className="tabla__span-meta">{meta}</span></span></td>
+                                    <td className="tabla__td position">Lens-Log <br/> <span className="tabla__td-span">Meta: <span className="tabla__span-meta">{meta}</span></span></td>
                                 </div>
                             </Link>
                             {filaGenerados.map((generado, index) => (
@@ -137,4 +139,4 @@ const BiseladoHora = () => {
     );
 };
 
-export default BiseladoHora;
+export default LensLogHora;

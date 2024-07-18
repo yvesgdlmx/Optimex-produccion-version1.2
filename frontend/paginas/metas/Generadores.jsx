@@ -3,7 +3,6 @@ const Generadores = () => {
   return (
     <>
     <h1 className="heading">Meta de generadores</h1>
-    <p className="mt metas-p">Administra tus metas por hora.</p>
     <div className="metas-modulo mt">
        <div className="metas-modulo__contenedor">
             <form action="" className="formulario">

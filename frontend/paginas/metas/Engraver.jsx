@@ -28,7 +28,6 @@ console.log(totalMetas)
   return (
     <>
     <h1 className="heading">Meta de Engravers</h1>
-    <p className="mt metas-p">Administra tus metas por hora.</p>
     <div className='metas-modulo'>
         <div className='metas-modulo__contenedor'>
             <table className='tabla'>

@@ -5,6 +5,9 @@ import PulidosProcesos from "../components/PulidosProcesos";
 import EngraversProcesos from "../components/EngraversProcesos";
 import TerminadosProcesos from "../components/TerminadosProcesos";
 import BiseladosProcesos from "../components/BiseladosProcesos";
+import ManualProcesos from '../components/ManualProcesos';
+import LensLogProcesos from '../components/LensLogProcesos';
+import JobCompleteProcesos from '../components/JobCompleteProcesos';
 
 const Procesos = () => {
   useEffect(() => {
@@ -18,13 +21,15 @@ const Procesos = () => {
   return (
     <>
       <h1 className="heading">Procesos</h1>
-      <p className="procesos__p-2">Visualiza los procesos, trabajos y metas de las estaciones</p>
+      <p className="procesos__p-2">Visualiza los procesos, trabajos y metas de las estaciones.</p>
+      <LensLogProcesos/>
       <TalladosProcesos />
       <GeneradoresProcesos />
       <PulidosProcesos />
       <EngraversProcesos />
       <TerminadosProcesos />
       <BiseladosProcesos />
+      <JobCompleteProcesos/>
     </>
   );
 }

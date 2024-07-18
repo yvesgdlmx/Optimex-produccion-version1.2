@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import clienteAxios from "../config/clienteAxios";
-import { Link } from "react-router-dom";
-import formatearHora from "../helpers/formatearHora";
 import GeneradoHora from "../components/GeneradoHora";
 import TalladoHora from "../components/TalladoHora";
 import PulidoHora from "../components/PulidoHora";
 import EngraverHora from "../components/EngraverHora";
 import TerminadoHora from "../components/TerminadoHora";
 import BiseladoHora from "../components/BiseladoHora";
+import ManualesHora from "../components/ManualesHora";
+import LensLogHora from "../components/LensLogHora";
+import JobCompleteHora from "../components/JobCompleteHora";
 
 const ProcesosHora = () => {
     useEffect(() => {
@@ -20,13 +20,15 @@ const ProcesosHora = () => {
       
     return (
         <>
-            <h1 className="heading2 ml-2">Trabajos por hora</h1>
+            <h1 className="heading2 ml-3">Trabajos por hora</h1>
+            <LensLogHora/>
             <TalladoHora/>
             <GeneradoHora/>
             <PulidoHora/>
             <EngraverHora/>
             <TerminadoHora/>
             <BiseladoHora/>
+            <JobCompleteHora/>
         </>
     );
 };
