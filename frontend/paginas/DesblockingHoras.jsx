@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import clienteAxios from "../config/clienteAxios";
 import Navegacion from "../components/Navegacion";
 
-const LensLogHoras = () => {
+const DesblockingHoras = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       window.location.reload();
@@ -25,8 +25,8 @@ const LensLogHoras = () => {
     const cargarDatos = async () => {
       try {
         const responseMetas = await clienteAxios('/metas/metas-manuales');
-        const metasLensLog = responseMetas.data.registros.filter(meta => meta.name.includes('LENS LOG'));
-        const sumaMetas = metasLensLog.reduce((acc, meta) => acc + meta.meta, 0);
+        const metasDesblocking = responseMetas.data.registros.filter(meta => meta.name.includes('DEBLOCKING'));
+        const sumaMetas = metasDesblocking.reduce((acc, meta) => acc + meta.meta, 0);
         setMeta(sumaMetas);
 
         const responseRegistros = await clienteAxios('/manual/manual/actualdia');
@@ -34,7 +34,7 @@ const LensLogHoras = () => {
         const registrosFiltrados = dataRegistros.filter(registro => {
           const [hora, minuto] = registro.hour.split(':').map(Number);
           const minutosTotales = hora * 60 + minuto;
-          return minutosTotales >= 390 && minutosTotales < 1380 && registro.name.includes('LENS LOG'); // 06:30 = 390 minutos, 23:00 = 1380 minutos
+          return minutosTotales >= 390 && minutosTotales < 1380 && registro.name.includes('DEBLOCKING'); // 06:30 = 390 minutos, 23:00 = 1380 minutos
         });
 
         const horas = new Set();
@@ -133,7 +133,7 @@ const LensLogHoras = () => {
         </Link>
       </div>
       <Navegacion/>
-      <h1 className="heading2">Surtido</h1>
+      <h1 className="heading2">Desbloqueo</h1>
       <div>
         <table className="a-tabla__table">
           <thead className="a-tabla__thead">
@@ -148,7 +148,7 @@ const LensLogHoras = () => {
           </thead>
           <tbody className="a-tabla__tbody">
             <tr className="a-tabla__tr-body">
-              <td className="a-tabla__td-body">Surtido</td>
+              <td className="a-tabla__td-body">Desbloqueo</td>
               <td className={`a-tabla__td-body ${claseSumaTotalAcumulados}`}>{totalesAcumulados}</td>
               <td className="a-tabla__td-body">{meta || 'No definida'}</td>
               {horasUnicas.map((hora, idx) => {
@@ -191,4 +191,4 @@ const LensLogHoras = () => {
   );
 };
 
-export default LensLogHoras;
+export default DesblockingHoras;

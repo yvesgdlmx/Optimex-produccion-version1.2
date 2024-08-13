@@ -10,6 +10,8 @@ import GeneradoresHora from '../paginas/GeneradoresHora';
 import PulidorasHora from '../paginas/PulidorasHora';
 import TalladosHora from '../paginas/TalladosHora';
 import EngraversHoras from '../paginas/EngraversHoras';
+import DesblockingHoras from '../paginas/DesblockingHoras';
+import ARHoras from '../paginas/ARHoras';
 import TerminadosHoras from '../paginas/TerminadosHoras';
 import BiseladorasHoras from '../paginas/BiseladorasHoras';
 import ManualesHoras from '../paginas/ManualesHoras';
@@ -43,6 +45,8 @@ import TablerosTalladoTerminado from '../paginas/tableros/TablerosTalladoTermina
 /* Historial */
 import HistorialPorHora from '../paginas/historial/HistorialPorHora';
 import HistorialPorTurnos from '../paginas/historial/HistorialPorTurnos';
+import HistorialIndex from '../paginas/historial/HistorialIndex';
+import HistorialPorRangos from '../paginas/historial/HistorialPorRangos';
 
 /* Auth */
 import Login from '../paginas/Login';
@@ -64,6 +68,8 @@ function App() {
                       <Route path='/generadores-horas' element={<GeneradoresHora/>} />
                       <Route path='/pulidoras-horas' element={<PulidorasHora/>} />
                       <Route path='/engravers-horas' element={<EngraversHoras/>} />
+                      <Route path='/desblocking-horas' element={<DesblockingHoras/>} />
+                      <Route path='ar-horas' element={<ARHoras/>} />
                       <Route path='/terminados-horas' element={<TerminadosHoras/>} />
                       <Route path='/biselados-horas' element={<BiseladorasHoras/>} />
                       <Route path='/lenslog-horas' element={<LensLogHoras/>} />
@@ -91,8 +97,10 @@ function App() {
                       <Route path='/tableros-tallado' element={<TablerosTallado/>} />
                       <Route path='/tableros-terminado' element= {<TablerosTerminado/>} />
                       <Route path='/tableros-tallado&terminado' element={<TablerosTalladoTerminado/>}/>
+                      <Route path='/historial-index' element={<HistorialIndex/>} />
                       <Route path='/historial' element={<HistorialPorHora/>} />
                       <Route path='/historial-turnos' element={<HistorialPorTurnos/>} />
+                      <Route path='/historial-rangos' element={<HistorialPorRangos/>}/>
                   </Route>
                   <Route path='/auth' element={<AuthLayout/>}>
                     <Route index element={<Login/>}/>

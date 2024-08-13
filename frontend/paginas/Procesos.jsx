@@ -8,6 +8,8 @@ import BiseladosProcesos from "../components/BiseladosProcesos";
 import ManualProcesos from '../components/ManualProcesos';
 import LensLogProcesos from '../components/LensLogProcesos';
 import JobCompleteProcesos from '../components/JobCompleteProcesos';
+import DesbloqueoProcesos from '../components/DesbloqueoProcesos';
+import ARProcesos from '../components/ARProcesos';
 
 const Procesos = () => {
   useEffect(() => {
@@ -27,6 +29,8 @@ const Procesos = () => {
       <GeneradoresProcesos />
       <PulidosProcesos />
       <EngraversProcesos />
+      <DesbloqueoProcesos/>
+      <ARProcesos/>
       <TerminadosProcesos />
       <BiseladosProcesos />
       <JobCompleteProcesos/>

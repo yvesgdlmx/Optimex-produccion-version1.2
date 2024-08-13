@@ -366,6 +366,7 @@ const TablerosTalladoTerminado = () => {
         console.error("La respuesta de las metas no contiene un array válido:", responseMetas.data);
       }
       setMetasPorMaquina6(metas);
+  
       const responseRegistros = await clienteAxios('/manual/manual/actualdia');
       const dataRegistros = responseRegistros.data.registros || [];
       const registrosFiltrados = dataRegistros.filter(registro => {
@@ -379,7 +380,6 @@ const TablerosTalladoTerminado = () => {
       const metaActual = metaAcumulada * horasTranscurridas;
       const hitsAcumulados = registrosFiltrados.reduce((acc, registro) => acc + parseInt(registro.hits || 0), 0);
       const hitsRestantes = metaActual - hitsAcumulados;
-  
       setMetaActual(metaActual);
       setHitsRestantes(hitsRestantes);
   
@@ -406,7 +406,7 @@ const TablerosTalladoTerminado = () => {
       console.error("Error al cargar los datos:", error);
     }
   };
-
+  
   useEffect(() => {
     cargarDatos();
     cargarDatosGeneradores();
@@ -736,6 +736,8 @@ const calcularTotalesPorTurno5 = (registros5, horasUnicas5) => {
   const totalesPorTurno4 = calcularTotalesPorTurno4(registros4, horasUnicas4);
   const totalesPorTurno5 = calcularTotalesPorTurno5(registros5, horasUnicas5);
   const totalesPorTurno6 = calcularTotalesPorTurno(registros6, horasUnicas6);
+
+  const totalHitsCompletados = registros6.reduce((acc, registro) => acc + parseInt(registro.hits || 0), 0); 
 
   const tablas = [
     (
@@ -1116,18 +1118,26 @@ const calcularTotalesPorTurno5 = (registros5, horasUnicas5) => {
       ),
       (
         <div key="tablaManuales" className='b-tabla__contenedor-2'>
-        <div className="tablaManuales__campo">
-          <h1 className="trabajos-completos">Trabajos completos:</h1>
-          <p className="trabajos-completos__parrafo">
-            {`Total: ${registros6.reduce((acc, registro) => acc + parseInt(registro.hits || 0), 0)}`}
-          </p>
-          <p className="trabajos-completos__parrafo">
-            {`Meta Actual: ${metaActual}`}
-          </p>
+          <div className="tablaManuales__campo">
+            <h1 className="trabajos-completos">Trabajos completos:</h1>
+            <p style={{ 
+              color: totalHitsCompletados >= metaActual ? 'green' : 'red', 
+              fontSize: '2.5em', // Ajusta el tamaño de la fuente según tus necesidades
+              textAlign: 'center', // Centra el texto
+              fontWeight: 'bold'
+            }}>
+              {`Total: ${totalHitsCompletados}`}
+            </p>
+            <p style={{
+              fontSize: '1.5em', // Ajusta el tamaño de la fuente según tus necesidades
+              textAlign: 'center' // Centra el texto
+            }}>
+              {`Meta Actual: ${metaActual}`}
+            </p>
+          </div>
         </div>
-      </div>
       )
-  ];
+];
 
   const handleAnterior = () => {
     setPaginaActual((prevPagina) => (prevPagina > 0 ? prevPagina - 1 : tablas.length - 1));
@@ -1135,7 +1145,7 @@ const calcularTotalesPorTurno5 = (registros5, horasUnicas5) => {
 
   const handleSiguiente = () => {
     setPaginaActual((prevPagina) => (prevPagina < tablas.length - 1 ? prevPagina + 1 : 0));
-    setTiempoRestante(30); // Reinicia el temporizador
+    setTiempoRestante(5); // Reinicia el temporizador
   };
 
   const handleFullScreen = () => {
@@ -1151,7 +1161,7 @@ const calcularTotalesPorTurno5 = (registros5, horasUnicas5) => {
     }
     setEnPantallaCompleta(true);
     setPaginaActual(0); // Reinicia a la primera tabla
-    setTiempoRestante(30); // Inicia el temporizador
+    setTiempoRestante(5); // Inicia el temporizador
     setTimeout(() => {
       const tableContainer = document.querySelector('.a-tabla__contenedor');
       if (tableContainer) {

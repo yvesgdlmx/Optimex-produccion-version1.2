@@ -8,6 +8,8 @@ import BiseladoHora from "../components/BiseladoHora";
 import ManualesHora from "../components/ManualesHora";
 import LensLogHora from "../components/LensLogHora";
 import JobCompleteHora from "../components/JobCompleteHora";
+import DesblockingHora from "../components/DesblockingHora";
+import ARHora from "../components/ARHora";
 
 const ProcesosHora = () => {
     useEffect(() => {
@@ -26,6 +28,8 @@ const ProcesosHora = () => {
             <GeneradoHora/>
             <PulidoHora/>
             <EngraverHora/>
+            <DesblockingHora/>
+            <ARHora/>
             <TerminadoHora/>
             <BiseladoHora/>
             <JobCompleteHora/>

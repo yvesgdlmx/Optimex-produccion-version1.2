@@ -59,7 +59,7 @@ const Layout = () => {
                 <p className='sidebar__texto'>Tableros</p>
               </div>
             </Link>
-            <Link to='/historial-turnos' className={location.pathname === '/historial-turnos' ? 'sidebar__link sidebar__link-activo' : 'sidebar__link'}>
+            <Link to='/historial-index' className={location.pathname === '/historial-turnos' ? 'sidebar__link sidebar__link-activo' : 'sidebar__link'}>
               <div className='sidebar__campo'>
                 <img className='sidebar__logo' src="../../img/history.png" alt="" width={40}/>
                 <p className='sidebar__texto'>Historial</p>

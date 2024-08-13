@@ -3,9 +3,8 @@ import clienteAxios from "../config/clienteAxios";
 import { Link, useLocation } from "react-router-dom";
 import formatearHora from "../helpers/formatearHora";
 
-const EngraverHora = () => {
+const ARHora = () => {
     const [registros, setRegistros] = useState([]);
-    const [meta, setMeta] = useState(0);
     const [totalesPorTurno, setTotalesPorTurno] = useState({
         matutino: 0,
         vespertino: 0,
@@ -14,19 +13,13 @@ const EngraverHora = () => {
     const location = useLocation();
 
     useEffect(() => {
-        const obtenerMeta = async () => {
-            const { data } = await clienteAxios(`/metas/metas-engravers`);
-            const sumaMetas = data.registros.reduce((acc, registro) => acc + registro.meta, 0);
-            setMeta(sumaMetas);
-        };
-        obtenerMeta();
-    }, []);
-
-    useEffect(() => {
         const obtenerRegistros = async () => {
-            const { data } = await clienteAxios(`/engraver/engraver/actualdia`);
+            const { data } = await clienteAxios(`/manual/manual/actualdia`);
+            const registrosAR = data.registros.filter(registro => {
+                return ['91', '92', '52', '53', '54', '55', '56'].some(num => registro.name.includes(num));
+            });
             // Filtrar los registros que están entre las 06:30 y las 23:00
-            const registrosFiltrados = data.registros.filter(registro => {
+            const registrosFiltrados = registrosAR.filter(registro => {
                 const [hora, minuto] = registro.hour.split(':').map(Number);
                 const minutosTotales = hora * 60 + minuto;
                 return minutosTotales >= 390 && minutosTotales < 1380; // 06:30 = 390 minutos, 23:00 = 1380 minutos
@@ -79,30 +72,6 @@ const EngraverHora = () => {
         setTotalesPorTurno(totales);
     };
 
-    const calcularHorasTranscurridas = (horaInicio, horaFin) => {
-        const [horaInicioH, horaInicioM] = horaInicio.split(':').map(Number);
-        const [horaFinH, horaFinM] = horaFin.split(':').map(Number);
-        const minutosInicio = horaInicioH * 60 + horaInicioM;
-        const minutosFin = horaFinH * 60 + horaFinM;
-        return Math.ceil((minutosFin - minutosInicio) / 60);
-    };
-
-    const obtenerHoraActual = () => {
-        const ahora = new Date();
-        const horas = String(ahora.getHours()).padStart(2, '0');
-        const minutos = String(ahora.getMinutes()).padStart(2, '0');
-        return `${horas}:${minutos}`;
-    };
-
-    const calcularMetaPorHorasTranscurridas = (horaInicio, horaFin, metaPorHora) => {
-        const horasTranscurridas = calcularHorasTranscurridas(horaInicio, horaFin);
-        console.log(`Meta: ${metaPorHora}, Horas Transcurridas: ${horasTranscurridas}`);
-        return horasTranscurridas * metaPorHora;
-    };
-
-    const hitsPorHora = agruparHitsPorHora();
-    const horasOrdenadas = Object.keys(hitsPorHora).sort().reverse();
-    const filaGenerados = horasOrdenadas.map((hora) => hitsPorHora[hora]);
     const formatearHoraSinSegundos = (hora) => {
         return hora.slice(0, 5); // Esto eliminará los segundos de la hora
     };
@@ -113,28 +82,13 @@ const EngraverHora = () => {
         return `${horaInicioFormateada} - ${horaFin}`;
     };
 
-    const getClassName = (hits, meta) => {
-        if (hits === 0) {
-            return "procesos-2__span-negro";
-        }
-        return hits >= meta ? "procesos-2__span-verde" : "procesos-2__span-rojo";
-    };
-
-    const horaActual = obtenerHoraActual();
-
-    // Calcular metas ajustadas para cada turno
-    const ajustarMetaPorTurno = (horaInicio, horaActual, metaPorHora) => {
-        const horasTranscurridas = Math.max(1, calcularHorasTranscurridas(horaInicio, horaActual));
-        return horasTranscurridas * metaPorHora;
-    };
-
-    const metaMatutinoFinal = ajustarMetaPorTurno("06:30", horaActual, meta);
-    const metaVespertinoFinal = ajustarMetaPorTurno("14:30", horaActual, meta);
-    const metaNocturnoFinal = ajustarMetaPorTurno("19:30", horaActual, meta);
+    const hitsPorHora = agruparHitsPorHora();
+    const horasOrdenadas = Object.keys(hitsPorHora).sort().reverse();
+    const filaGenerados = horasOrdenadas.map((hora) => hitsPorHora[hora]);
 
     return (
         <>
-            <div className="generado-hora" id="engravers">
+            <div className="generado-hora" id="arhora">
                 <table className="tabla">
                     <thead className="tabla__thead">
                         <tr className="tabla__tr">
@@ -146,14 +100,14 @@ const EngraverHora = () => {
                     </thead>
                     <tbody>
                         <tr className="tabla__tr">
-                            <Link to={'/engravers-horas'} className="link__tabla">
+                            <Link to={'/ar-horas'} className="link__tabla">
                                 <div className="tabla__th-flex">
                                     <img src="./img/ver.png" alt="imagen-ver" className="tabla__ver" />
-                                    <td className="tabla__td position">Engraver <br/> <span className="tabla__td-span">Meta: <span className="tabla__span-meta">{meta}</span></span></td>
+                                    <td className="tabla__td position">AR</td>
                                 </div>
                             </Link>
                             {filaGenerados.map((generado, index) => (
-                                <td key={index} className={metaMatutinoFinal > generado ? `tabla__td generadores__uncheck` : `tabla__td generadores__check`}>{generado}</td>
+                                <td key={index} className="tabla__td">{generado}</td>
                             ))}
                         </tr>
                     </tbody>
@@ -161,17 +115,17 @@ const EngraverHora = () => {
             </div>
             <div className='tabla__div'>
                 <div className='tabla__campo'>
-                    <p className='tabla__p'>Total Matutino: <span className={getClassName(totalesPorTurno.matutino, metaMatutinoFinal)}>{totalesPorTurno.matutino}</span></p>
+                    <p className='tabla__p'>Total Matutino: <span className="">{totalesPorTurno.matutino}</span></p>
                 </div>
                 <div className='tabla__campo'>
-                    <p className='tabla__p'>Total Vespertino: <span className={getClassName(totalesPorTurno.vespertino, metaVespertinoFinal)}>{totalesPorTurno.vespertino}</span></p>
+                    <p className='tabla__p'>Total Vespertino: <span className="">{totalesPorTurno.vespertino}</span></p>
                 </div>
                 <div className='tabla__campo'>
-                    <p className='tabla__p'>Total Nocturno: <span className={getClassName(totalesPorTurno.nocturno, metaNocturnoFinal)}>{totalesPorTurno.nocturno}</span></p>
+                    <p className='tabla__p'>Total Nocturno: <span className="">{totalesPorTurno.nocturno}</span></p>
                 </div>
             </div>
         </>
     );
 };
 
-export default EngraverHora;
+export default ARHora;

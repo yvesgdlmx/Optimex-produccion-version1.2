@@ -117,12 +117,14 @@ const EngraversProcesos = () => {
                 <div className="procesos-2">
                     <div className="procesos-2__flex">
                         <p className="procesos-2__p-azul">Engraver</p>
-                        <p className="procesos-2__p">Trabajos: <br /><span className={meta > totalHits ? `procesos__span-2 generadores__uncheck` : `procesos__span-2 generadores__check`}>{totalHits}</span></p>
-                        <p className="procesos-2__p">Meta: <br /><span className="procesos-2__span">{meta}</span></p>
-                        <p className="procesos-2__p">Último Registro: <br /><span className="procesos-2__span">{ultimaHora} - {siguienteHora}</span></p>
-                        <p className="procesos-2__p">Matutino: <br /><span className={getClassName(hitsMatutino, metaMatutino)}>{hitsMatutino}</span></p>
-                        <p className="procesos-2__p">Vespertino: <br /><span className={getClassName(hitsVespertino, metaVespertino)}>{hitsVespertino}</span></p>
-                        <p className="procesos-2__p">Nocturno: <br /><span className={getClassName(hitsNocturno, metaNocturno)}>{hitsNocturno}</span></p>
+                        <div className="procesos__campo-engravers">
+                            <p className="procesos-2__p">Trabajos: <br /><span className={meta > totalHits ? `procesos__span-2 generadores__uncheck` : `procesos__span-2 generadores__check`}>{totalHits}</span></p>
+                            <p className="procesos-2__p">Meta: <br /><span className="procesos-2__span">{meta}</span></p>
+                            <p className="procesos-2__p">Último Registro: <br /><span className="procesos-2__span">{ultimaHora} - {siguienteHora}</span></p>
+                            <p className="procesos-2__p">Matutino: <br /><span className={getClassName(hitsMatutino, metaMatutino)}>{hitsMatutino}</span></p>
+                            <p className="procesos-2__p">Vespertino: <br /><span className={getClassName(hitsVespertino, metaVespertino)}>{hitsVespertino}</span></p>
+                            <p className="procesos-2__p">Nocturno: <br /><span className={getClassName(hitsNocturno, metaNocturno)}>{hitsNocturno}</span></p>
+                        </div>
                     </div>
                 </div>
             </Link>

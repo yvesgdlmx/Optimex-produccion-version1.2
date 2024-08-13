@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import clienteAxios from "../config/clienteAxios";
+import Navegacion from "../components/Navegacion";
 
 const GeneradoresHora = () => {
   useEffect(() => {
@@ -21,7 +22,6 @@ const GeneradoresHora = () => {
     nocturno: 0
   });
 
-  // Definir el orden de las células aquí
   const ordenCelulas = [
     "241 GENERATOR 1",
     "242 GENERATOR 2",
@@ -55,7 +55,6 @@ const GeneradoresHora = () => {
           return minutosTotales >= 390 && minutosTotales < 1380; // 06:30 = 390 minutos, 23:00 = 1380 minutos
         });
 
-        // Agrupar registros por célula
         const registrosAgrupados = registrosFiltrados.reduce((acc, registro) => {
           const celula = registro.name.split("-")[0].trim().toUpperCase().replace(/\s+/g, ' ');
           if (!acc[celula]) {
@@ -90,34 +89,6 @@ const GeneradoresHora = () => {
     cargarDatos();
   }, []);
 
-  // Calcular la suma total de los totales acumulados
-  const sumaTotalAcumulados = Object.values(totalesAcumulados).reduce((acc, curr) => acc + curr, 0);
-
-  // Calcular la meta acumulada total en función de las horas transcurridas
-  const horasTranscurridas = horasUnicas.length;
-  const metaAcumuladaTotal = Object.keys(metasPorMaquina).reduce((acc, celula) => {
-    const meta = metasPorMaquina[celula] || 0;
-    return acc + (meta * horasTranscurridas);
-  }, 0);
-
-  // Calcular la suma total de las metas
-  const sumaTotalMetas = Object.keys(metasPorMaquina).reduce((acc, celula) => {
-    return acc + (metasPorMaquina[celula] || 0);
-  }, 0);
-
-  // Calcular la suma total de hits por hora
-  const sumaHitsPorHora = horasUnicas.map(hora => {
-    const horaSinFormato = hora.split(' - ')[0];
-    return Object.values(registrosAgrupados).flat().filter(r => r.hour.startsWith(horaSinFormato))
-      .reduce((acc, curr) => acc + parseInt(curr.hits || 0), 0);
-  });
-
-  // Calcular la meta por hora
-  const metaPorHora = sumaTotalMetas;
-
-  // Determinar la clase para la suma total acumulada
-  const claseSumaTotalAcumulados = sumaTotalAcumulados >= metaAcumuladaTotal ? "generadores__check" : "generadores__uncheck";
-
   const calcularTotalesPorTurno = (registros) => {
     const totales = {
       matutino: 0,
@@ -129,7 +100,7 @@ const GeneradoresHora = () => {
       const minutosTotales = hora * 60 + minuto;
       if (minutosTotales >= 390 && minutosTotales < 870) { // 06:30 - 14:30
         totales.matutino += registro.hits;
-      } else if (minutosTotales >= 870 && minutosTotales < 1290) { // 14:30 - 21:30
+      } else if (minutosTotales >= 870 && minutosTotales < 1170) { // 14:30 - 19:30
         totales.vespertino += registro.hits;
       } else if (minutosTotales >= 1170 && minutosTotales < 1380) { // 19:30 - 23:00
         totales.nocturno += registro.hits;
@@ -137,6 +108,48 @@ const GeneradoresHora = () => {
     });
     setTotalesPorTurno(totales);
   };
+
+  const calcularHorasTranscurridasDesde = (horaInicio) => {
+    const ahora = new Date();
+    const inicio = new Date();
+    inicio.setHours(horaInicio, 30, 0, 0);
+    const diferenciaMilisegundos = ahora - inicio;
+    const diferenciaHoras = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60)); // Convertir milisegundos a horas completas
+    return diferenciaHoras;
+  };
+
+  const sumaTotalAcumulados = Object.values(totalesAcumulados).reduce((acc, curr) => acc + curr, 0);
+
+  const metaAcumuladaTotal = Object.keys(metasPorMaquina).reduce((acc, celula) => {
+    const meta = metasPorMaquina[celula] || 0;
+    return acc + (meta * horasUnicas.length);
+  }, 0);
+
+  const sumaTotalMetas = Object.keys(metasPorMaquina).reduce((acc, celula) => {
+    return acc + (metasPorMaquina[celula] || 0);
+  }, 0);
+
+  const sumaHitsPorHora = horasUnicas.map(hora => {
+    const horaSinFormato = hora.split(' - ')[0];
+    return Object.values(registrosAgrupados).flat().filter(r => r.hour.startsWith(horaSinFormato))
+      .reduce((acc, curr) => acc + parseInt(curr.hits || 0), 0);
+  });
+
+  const metaPorHora = sumaTotalMetas;
+
+  const claseSumaTotalAcumulados = sumaTotalAcumulados >= metaAcumuladaTotal ? "generadores__check" : "generadores__uncheck";
+
+  const horasTranscurridasMatutino = calcularHorasTranscurridasDesde(6);
+  const metaAcumuladaMatutino = sumaTotalMetas * (horasTranscurridasMatutino > 0 ? horasTranscurridasMatutino : 1);
+  const claseTotalMatutino = (totalesPorTurno.matutino >= metaAcumuladaMatutino && totalesPorTurno.matutino > 0) ? "generadores__check" : "generadores__uncheck";
+
+  const horasTranscurridasVespertino = calcularHorasTranscurridasDesde(14);
+  const metaAcumuladaVespertino = sumaTotalMetas * (horasTranscurridasVespertino > 0 ? horasTranscurridasVespertino : 1);
+  const claseTotalVespertino = (totalesPorTurno.vespertino >= metaAcumuladaVespertino && totalesPorTurno.vespertino > 0) ? "generadores__check" : "generadores__uncheck";
+
+  const horasTranscurridasNocturno = calcularHorasTranscurridasDesde(19);
+  const metaAcumuladaNocturno = sumaTotalMetas * (horasTranscurridasNocturno > 0 ? horasTranscurridasNocturno : 1);
+  const claseTotalNocturno = (totalesPorTurno.nocturno >= metaAcumuladaNocturno && totalesPorTurno.nocturno > 0) ? "generadores__check" : "generadores__uncheck";
 
   return (
     <>
@@ -148,6 +161,7 @@ const GeneradoresHora = () => {
           </button>
         </Link>
       </div>
+      <Navegacion/>
       <h1 className="heading2">Generadores</h1>
       <div>
         <table className="a-tabla__table">
@@ -201,15 +215,15 @@ const GeneradoresHora = () => {
         </table>
       </div>
       <div className='tabla__div'>
-          <div className='tabla__campo position-rela-2'>
-              <p className='tabla__p'>Total Matutino: <span className='tabla__span'>{totalesPorTurno.matutino}</span></p>
-          </div>
-          <div className='tabla__campo position-rela-2'>
-              <p className='tabla__p'>Total Vespertino: <span className='tabla__span'>{totalesPorTurno.vespertino}</span></p>
-          </div>
-          <div className='tabla__campo position-rela-2'>
-              <p className='tabla__p'>Total Nocturno: <span className='tabla__span'>{totalesPorTurno.nocturno}</span></p>
-          </div>
+        <div className='tabla__campo position-rela-2'>
+          <p className='tabla__p'>Total Matutino: <span className={`tabla__span ${claseTotalMatutino}`}>{totalesPorTurno.matutino}</span></p>
+        </div>
+        <div className='tabla__campo position-rela-2'>
+          <p className='tabla__p'>Total Vespertino: <span className={`tabla__span ${claseTotalVespertino}`}>{totalesPorTurno.vespertino}</span></p>
+        </div>
+        <div className='tabla__campo position-rela-2'>
+          <p className='tabla__p'>Total Nocturno: <span className={`tabla__span ${claseTotalNocturno}`}>{totalesPorTurno.nocturno}</span></p>
+        </div>
       </div>
     </>
   );

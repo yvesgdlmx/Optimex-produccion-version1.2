@@ -7,39 +7,60 @@ const Metas = () => {
     <p className="mt metas-p">Selecciona un proceso para administrar sus metas.</p>
     <div className="meta mt">
         <div className="meta__grid">
-            <Link to={'/meta-generado'}>
-                <div className="meta__campo">
-                    <h2 className="meta__h2">Generadores</h2>
+            <Link to={'/meta-tallado'}>
+                <div class="card">
+                    <div class="card-details">
+                        <p class="text-title">B. tallado</p>
+                    </div>
+                    <button class="card-button">Ver metas</button>
                 </div>
             </Link>
-            <Link to={'/meta-tallado'}>
-                <div className="meta__campo">
-                    <h2 className="meta__h2">Bloqueos de Tallado</h2>
+            <Link to={'/meta-generado'}>
+                <div class="card">
+                    <div class="card-details">
+                        <p class="text-title">Generadores</p>
+                    </div>
+                    <button class="card-button">Ver metas</button>
                 </div>
             </Link>
             <Link to={'/meta-pulido'}>
-                <div className="meta__campo">
-                    <h2 className="meta__h2">Pulidoras</h2>
+                <div class="card">
+                    <div class="card-details">
+                        <p class="text-title">Pulido</p>
+                    </div>
+                    <button class="card-button">Ver metas</button>
                 </div>
             </Link>
             <Link to={'/meta-engraver'}>
-                <div className="meta__campo">
-                    <h2 className="meta__h2">Engravers</h2>
+                <div class="card">
+                    <div class="card-details">
+                        <p class="text-title">Engraver</p>
+                    </div>
+                    <button class="card-button">Ver metas</button>
                 </div>
             </Link>
             <Link to={'/meta-terminado'}>
-                <div className="meta__campo">
-                    <h2 className="meta__h2">Bloqueos de Terminado</h2>
+                <div class="card">
+                    <div class="card-details">
+                        <p class="text-title">B. Terminado</p>
+                    </div>
+                    <button class="card-button">Ver metas</button>
                 </div>
             </Link>
             <Link to={'/meta-biselado'}>
-                <div className="meta__campo">
-                    <h2 className="meta__h2">Biseladoras</h2>
+                <div class="card">
+                    <div class="card-details">
+                        <p class="text-title">Biselado</p>
+                    </div>
+                    <button class="card-button">Ver metas</button>
                 </div>
             </Link>
             <Link to={'/meta-manual'}>
-                <div className="meta__campo">
-                    <h2 className="meta__h2">Estaciones Manuales</h2>
+                <div class="card">
+                    <div class="card-details">
+                        <p class="text-title">Manuales</p>
+                    </div>
+                    <button class="card-button">Ver metas</button>
                 </div>
             </Link>
         </div>

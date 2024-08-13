@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import clienteAxios from "../config/clienteAxios";
 import Navegacion from "../components/Navegacion";
 
-const LensLogHoras = () => {
+const ARHoras = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       window.location.reload();
@@ -13,7 +13,6 @@ const LensLogHoras = () => {
 
   const [registros, setRegistros] = useState([]);
   const [horasUnicas, setHorasUnicas] = useState([]);
-  const [meta, setMeta] = useState(0);
   const [totalesAcumulados, setTotalesAcumulados] = useState(0);
   const [totalesPorTurno, setTotalesPorTurno] = useState({
     matutino: 0,
@@ -24,17 +23,13 @@ const LensLogHoras = () => {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const responseMetas = await clienteAxios('/metas/metas-manuales');
-        const metasLensLog = responseMetas.data.registros.filter(meta => meta.name.includes('LENS LOG'));
-        const sumaMetas = metasLensLog.reduce((acc, meta) => acc + meta.meta, 0);
-        setMeta(sumaMetas);
-
         const responseRegistros = await clienteAxios('/manual/manual/actualdia');
         const dataRegistros = responseRegistros.data.registros || [];
         const registrosFiltrados = dataRegistros.filter(registro => {
           const [hora, minuto] = registro.hour.split(':').map(Number);
           const minutosTotales = hora * 60 + minuto;
-          return minutosTotales >= 390 && minutosTotales < 1380 && registro.name.includes('LENS LOG'); // 06:30 = 390 minutos, 23:00 = 1380 minutos
+          return minutosTotales >= 390 && minutosTotales < 1380 && 
+            ['91', '92', '52', '53', '54', '55', '56'].some(num => registro.name.includes(num));
         });
 
         const horas = new Set();
@@ -95,32 +90,11 @@ const LensLogHoras = () => {
     setTotalesPorTurno(totales);
   };
 
-  const calcularHorasTranscurridasDesde = (horaInicio) => {
-    const ahora = new Date();
-    const inicio = new Date();
-    inicio.setHours(horaInicio, 30, 0, 0);
-    const diferenciaMilisegundos = ahora - inicio;
-    const diferenciaHoras = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60)); // Convertir milisegundos a horas completas
-    return diferenciaHoras;
-  };
-
   const sumaHitsPorHora = horasUnicas.map(hora => {
     const horaSinFormato = hora.split(' - ')[0];
     return registros.filter(r => r.hour.startsWith(horaSinFormato))
       .reduce((acc, curr) => acc + parseInt(curr.hits || 0), 0);
   });
-
-  const metaPorHora = meta;
-  const claseSumaTotalAcumulados = totalesAcumulados >= (meta * horasUnicas.length) ? "generadores__check" : "generadores__uncheck";
-  const horasTranscurridasMatutino = calcularHorasTranscurridasDesde(6);
-  const metaAcumuladaMatutino = meta * (horasTranscurridasMatutino > 0 ? horasTranscurridasMatutino : 1);
-  const claseTotalMatutino = (totalesPorTurno.matutino >= metaAcumuladaMatutino && totalesPorTurno.matutino > 0) ? "generadores__check" : "generadores__uncheck";
-  const horasTranscurridasVespertino = calcularHorasTranscurridasDesde(14);
-  const metaAcumuladaVespertino = meta * (horasTranscurridasVespertino > 0 ? horasTranscurridasVespertino : 1);
-  const claseTotalVespertino = (totalesPorTurno.vespertino >= metaAcumuladaVespertino && totalesPorTurno.vespertino > 0) ? "generadores__check" : "generadores__uncheck";
-  const horasTranscurridasNocturno = calcularHorasTranscurridasDesde(19);
-  const metaAcumuladaNocturno = meta * (horasTranscurridasNocturno > 0 ? horasTranscurridasNocturno : 1);
-  const claseTotalNocturno = (totalesPorTurno.nocturno >= metaAcumuladaNocturno && totalesPorTurno.nocturno > 0) ? "generadores__check" : "generadores__uncheck";
 
   return (
     <>
@@ -132,15 +106,14 @@ const LensLogHoras = () => {
           </button>
         </Link>
       </div>
-      <Navegacion/>
-      <h1 className="heading2">Surtido</h1>
+      <Navegacion />
+      <h1 className="heading2">Anti Reflejante</h1>
       <div>
         <table className="a-tabla__table">
           <thead className="a-tabla__thead">
             <tr className="a-tabla__tr-head">
               <th className="a-tabla__th-head">Nombre</th>
               <th className="a-tabla__th-head">Total Acumulado</th>
-              <th className="a-tabla__th-head">Meta</th>
               {horasUnicas.map((hora, index) => (
                 <th key={index} className="a-tabla__th-head">{hora}</th>
               ))}
@@ -148,15 +121,14 @@ const LensLogHoras = () => {
           </thead>
           <tbody className="a-tabla__tbody">
             <tr className="a-tabla__tr-body">
-              <td className="a-tabla__td-body">Surtido</td>
-              <td className={`a-tabla__td-body ${claseSumaTotalAcumulados}`}>{totalesAcumulados}</td>
-              <td className="a-tabla__td-body">{meta || 'No definida'}</td>
+              <td className="a-tabla__td-body">AR</td>
+              <td className="a-tabla__td-body">{totalesAcumulados}</td>
               {horasUnicas.map((hora, idx) => {
                 const horaSinFormato = hora.split(' - ')[0];
                 const totalHits = registros.filter(r => r.hour.startsWith(horaSinFormato))
                   .reduce((acc, curr) => acc + parseInt(curr.hits || 0), 0);
                 return (
-                  <td key={idx} className={totalHits >= meta ? "a-tabla__td-body generadores__check" : "a-tabla__td-body generadores__uncheck"}>
+                  <td key={idx} className="a-tabla__td-body">
                     {totalHits}
                   </td>
                 );
@@ -164,31 +136,27 @@ const LensLogHoras = () => {
             </tr>
             <tr className="a-tabla__tr-body">
               <td className="a-tabla__td-body">Totales</td>
-              <td className={`a-tabla__td-body fw ${claseSumaTotalAcumulados}`}>{totalesAcumulados}</td>
-              <td className="a-tabla__td-body fw">{meta}</td>
-              {sumaHitsPorHora.map((sumaHits, index) => {
-                const claseSumaHits = sumaHits >= metaPorHora ? "generadores__check" : "generadores__uncheck";
-                return (
-                  <td key={index} className={`a-tabla__td-body fw ${claseSumaHits}`}>{sumaHits}</td>
-                );
-              })}
+              <td className="a-tabla__td-body fw">{totalesAcumulados}</td>
+              {sumaHitsPorHora.map((sumaHits, index) => (
+                <td key={index} className="a-tabla__td-body fw">{sumaHits}</td>
+              ))}
             </tr>
           </tbody>
         </table>
       </div>
       <div className='tabla__div'>
         <div className='tabla__campo position-rela-2'>
-          <p className='tabla__p'>Total Matutino: <span className={`tabla__span ${claseTotalMatutino}`}>{totalesPorTurno.matutino}</span></p>
+          <p className='tabla__p'>Total Matutino: <span className="tabla__span">{totalesPorTurno.matutino}</span></p>
         </div>
         <div className='tabla__campo position-rela-2'>
-          <p className='tabla__p'>Total Vespertino: <span className={`tabla__span ${claseTotalVespertino}`}>{totalesPorTurno.vespertino}</span></p>
+          <p className='tabla__p'>Total Vespertino: <span className="tabla__span">{totalesPorTurno.vespertino}</span></p>
         </div>
         <div className='tabla__campo position-rela-2'>
-          <p className='tabla__p'>Total Nocturno: <span className={`tabla__span ${claseTotalNocturno}`}>{totalesPorTurno.nocturno}</span></p>
+          <p className='tabla__p'>Total Nocturno: <span className="tabla__span">{totalesPorTurno.nocturno}</span></p>
         </div>
       </div>
     </>
   );
 };
 
-export default LensLogHoras;
+export default ARHoras;

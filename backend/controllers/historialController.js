@@ -325,7 +325,61 @@ export default obtenerRegistrosTurnos;
     res.json({ registrosFormateados });
 }*/
 
+const obtenerRegistrosTurnosRangos = async (req, res) => {
+    const { anio, mes, diaInicio, diaFin } = req.params;
+    try {
+      const registros = [];
+      // Obtener registros de todos los modelos
+      for (const Modelo of modelos) {
+        const registrosModelo = await Modelo.findAll({
+          where: {
+            [Sequelize.Op.and]: [
+              {
+                fecha: {
+                  [Sequelize.Op.and]: [
+                    Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('fecha')), anio),
+                    Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('fecha')), mes),
+                    {
+                      [Sequelize.Op.or]: [
+                        {
+                          [Sequelize.Op.and]: [
+                            Sequelize.where(Sequelize.fn('DAY', Sequelize.col('fecha')), {
+                              [Sequelize.Op.gte]: diaInicio
+                            }),
+                            Sequelize.where(Sequelize.fn('DAY', Sequelize.col('fecha')), {
+                              [Sequelize.Op.lte]: diaFin
+                            })
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        });
+        // Formatear la fecha de cada registro y extraer el nombre adecuadamente
+        const registrosFormateados = registrosModelo.map((registro) => {
+          // Dividir el nombre por el guion y tomar la primera parte
+          const nombreParts = registro.name.split('-');
+          const nombre = nombreParts.length > 1 ? nombreParts[0].trim() : registro.name;
+          return {
+            ...registro.toJSON(),
+            fecha: registro.fecha.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),
+            name: nombre
+          };
+        });
+        registros.push(...registrosFormateados);
+      }
+      res.json({ registros });
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener los registros' });
+    }
+  };
+
 export {
     obtenerRegistros,
-    obtenerRegistrosTurnos
+    obtenerRegistrosTurnos,
+    obtenerRegistrosTurnosRangos
 }

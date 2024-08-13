@@ -14,15 +14,15 @@ const estaciones = {
   "Producción": ["32 JOB COMPLETE"],
 };
 
-const HistorialPorTurnos = () => {
+const HistorialPorRangos = () => {
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   const [anio, setAnio] = useState(yesterday.getFullYear().toString());
   const [mes, setMes] = useState((yesterday.getMonth() + 1).toString().padStart(2, '0'));
-  const [dia, setDia] = useState(yesterday.getDate().toString());
+  const [diaInicio, setDiaInicio] = useState(yesterday.getDate().toString());
+  const [diaFin, setDiaFin] = useState(yesterday.getDate().toString());
   const [registros, setRegistros] = useState([]);
-  const [metas, setMetas] = useState({});
 
   const handleAnioChange = (e) => {
     setAnio(e.target.value);
@@ -32,14 +32,18 @@ const HistorialPorTurnos = () => {
     setMes(e.target.value);
   };
 
-  const handleDiaChange = (e) => {
-    setDia(e.target.value);
+  const handleDiaInicioChange = (e) => {
+    setDiaInicio(e.target.value);
+  };
+
+  const handleDiaFinChange = (e) => {
+    setDiaFin(e.target.value);
   };
 
   useEffect(() => {
     const obtenerRegistros = async () => {
       try {
-        const { data } = await clienteAxios(`/historial/historial-2/${anio}/${mes}/${dia}`);
+        const { data } = await clienteAxios(`/historial/historial-3/${anio}/${mes}/${diaInicio}/${diaFin}`);
         console.log("Datos obtenidos de la API:", data);
         setRegistros(data.registros || []);
       } catch (error) {
@@ -48,64 +52,8 @@ const HistorialPorTurnos = () => {
       }
     };
 
-    const obtenerMetas = async () => {
-      try {
-        const responseMetasTallados = await clienteAxios.get('/metas/metas-tallados');
-        const responseMetasLensLog = await clienteAxios.get('/metas/metas-manuales');
-        const responseMetasGeneradores = await clienteAxios.get('/metas/metas-generadores');
-        const responseMetasPulidos = await clienteAxios.get('/metas/metas-pulidos');
-        const responseMetasEngravers = await clienteAxios.get('/metas/metas-engravers');
-        const responseMetasTerminados = await clienteAxios.get('/metas/metas-terminados');
-        const responseMetasBiselados = await clienteAxios.get('/metas/metas-biselados');
-        
-        const metasPorMaquinaTallados = responseMetasTallados.data.registros.reduce((acc, curr) => {
-          acc[curr.name] = curr.meta;
-          return acc;
-        }, {});
-        const metasPorMaquinaLensLog = responseMetasLensLog.data.registros.reduce((acc, curr) => {
-          if (curr.name.includes('LENS LOG') || curr.name.includes('JOB COMPLETE') || curr.name.includes('DEBLOCKING')) {
-            acc[curr.name] = curr.meta;
-          }
-          return acc;
-        }, {});
-        const metasPorMaquinaGeneradores = responseMetasGeneradores.data.registros.reduce((acc, curr) => {
-          acc[curr.name.toUpperCase().trim()] = curr.meta;
-          return acc;
-        }, {});
-        const metasPorMaquinaPulidos = responseMetasPulidos.data.registros.reduce((acc, curr) => {
-          acc[curr.name.toUpperCase().trim()] = curr.meta;
-          return acc;
-        }, {});
-        const metasPorMaquinaEngravers = responseMetasEngravers.data.registros.reduce((acc, curr) => {
-          acc[curr.name.toUpperCase().trim()] = curr.meta;
-          return acc;
-        }, {});
-        const metasPorMaquinaTerminados = responseMetasTerminados.data.registros.reduce((acc, curr) => {
-          acc[curr.name.toUpperCase().trim()] = curr.meta;
-          return acc;
-        }, {});
-        const metasPorMaquinaBiselados = responseMetasBiselados.data.registros.reduce((acc, curr) => {
-          acc[curr.name.toUpperCase().trim()] = curr.meta;
-          return acc;
-        }, {});
-        
-        setMetas({
-          ...metasPorMaquinaTallados,
-          ...metasPorMaquinaLensLog,
-          ...metasPorMaquinaGeneradores,
-          ...metasPorMaquinaPulidos,
-          ...metasPorMaquinaEngravers,
-          ...metasPorMaquinaTerminados,
-          ...metasPorMaquinaBiselados,
-        });
-      } catch (error) {
-        console.error("Error al obtener las metas:", error);
-      }
-    };
-
     obtenerRegistros();
-    obtenerMetas();
-  }, [anio, mes, dia]);
+  }, [anio, mes, diaInicio, diaFin]);
 
   // Filtrar registros fuera del rango 06:30 a 23:00
   const registrosFiltrados = registros.filter(({ hour }) => {
@@ -162,10 +110,6 @@ const HistorialPorTurnos = () => {
   // Calcular el total de hits a nivel general
   const totalHits = Object.values(registrosAgrupados).reduce((acc, { hits }) => acc + hits, 0);
 
-  const getClassName = (hits, metaJornada) => {
-    return hits >= metaJornada ? 'generadores__check' : 'generadores__uncheck';
-  };
-
   const renderizarTablasPorEstacion = () => {
     return Object.entries(estaciones).map(([nombreEstacion, maquinas]) => {
       const registrosEstacion = maquinas.map((maquina) => registrosAgrupados[maquina]).filter(Boolean);
@@ -175,27 +119,22 @@ const HistorialPorTurnos = () => {
           <table className="a-tabla__table">
             <thead className="a-tabla__thead">
               <tr className="a-tabla__tr-head">
-                <th className="a-tabla__th-head" colSpan="4"><strong>{nombreEstacion}</strong></th>
+                <th className="a-tabla__th-head" colSpan="3"><strong>{nombreEstacion}</strong></th>
               </tr>
               <tr className="a-tabla__tr-head">
                 <th className="a-tabla__th-head">Nombre</th>
                 <th className="a-tabla__th-head">Fecha</th>
                 <th className="a-tabla__th-head">Hits</th>
-                <th className="a-tabla__th-head">Meta</th>
               </tr>
             </thead>
             <tbody className="a-tabla__tbody">
               {registrosEstacion.map((registro, index) => {
                 const maquina = maquinas[index];
-                const metaMaquina = metas[maquina] || 0;
-                const metaJornada = metaMaquina * 19; // 19 horas de 06:30 AM a 01:30 AM
-                const claseMeta = getClassName(registro.hits, metaJornada);
                 return (
                   <tr className="a-tabla__tr-body" key={index}>
                     <td className="a-tabla__td-body">{maquina}</td>
-                    <td className="a-tabla__td-body">{`${anio}-${mes}-${dia}`}</td>
-                    <td className={`a-tabla__td-body ${claseMeta}`}>{registro.hits}</td>
-                    <td className="a-tabla__td-body">{metaJornada}</td>
+                    <td className="a-tabla__td-body">{`${anio}-${mes}-${diaInicio} al ${diaFin}`}</td>
+                    <td className="a-tabla__td-body">{registro.hits}</td>
                   </tr>
                 );
               })}
@@ -228,7 +167,7 @@ const HistorialPorTurnos = () => {
   return (
     <>
       <h1 className="heading">Historial de Registros</h1>
-      <p className="heading__texto">Puedes filtrar tus registros por una fecha específica y visualizar los trabajos realizados</p>
+      <p className="heading__texto">Puedes filtrar tus registros por un rango de fechas y visualizar los trabajos realizados</p>
       <div className='selectores'>
         <div className='selectores__campo'>
           <label className='selectores__label' htmlFor="">Año</label>
@@ -240,10 +179,10 @@ const HistorialPorTurnos = () => {
         <div className='selectores__campo'>
           <label className='selectores__label' htmlFor="">Mes</label>
           <select className='selectores__select' name="" id="" value={mes} onChange={handleMesChange}>
-            <option classame='selectores__option' value="01">Enero</option>
-            <option classame='selectores__option' value="02">Febrero</option>
-            <option classame='selectores__option' value="03">Marzo</option>
-            <option classame='selectores__option' value="04">Abril</option>
+            <option className='selectores__option' value="01">Enero</option>
+            <option className='selectores__option' value="02">Febrero</option>
+            <option className='selectores__option' value="03">Marzo</option>
+            <option className='selectores__option' value="04">Abril</option>
             <option classame='selectores__option' value="05">Mayo</option>
             <option classame='selectores__option' value="06">Junio</option>
             <option classame='selectores__option' value="07">Julio</option>
@@ -255,8 +194,16 @@ const HistorialPorTurnos = () => {
           </select>
         </div>
         <div className='selectores__campo'>
-          <label className='selectores__label' htmlFor="">Día</label>
-          <select name="" id="" className='selectores__select' value={dia} onChange={handleDiaChange}>
+          <label className='selectores__label' htmlFor="">Día Inicio</label>
+          <select name="" id="" className='selectores__select' value={diaInicio} onChange={handleDiaInicioChange}>
+            {[...Array(31).keys()].map((day) => (
+              <option className='selectores__option' key={day + 1} value={day + 1}>{day + 1}</option>
+            ))}
+          </select>
+        </div>
+        <div className='selectores__campo'>
+          <label className='selectores__label' htmlFor="">Día Fin</label>
+          <select name="" id="" className='selectores__select' value={diaFin} onChange={handleDiaFinChange}>
             {[...Array(31).keys()].map((day) => (
               <option className='selectores__option' key={day + 1} value={day + 1}>{day + 1}</option>
             ))}
@@ -288,4 +235,4 @@ const HistorialPorTurnos = () => {
   );
 };
 
-export default HistorialPorTurnos;
+export default HistorialPorRangos;

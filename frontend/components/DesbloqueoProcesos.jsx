@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import clienteAxios from "../config/clienteAxios";
 import { Link } from "react-router-dom";
 
-const LensLogProcesos = () => {
+const DesbloqueoProcesos = () => {
     const [totalHits, setTotalHits] = useState(0);
     const [ultimaHora, setUltimaHora] = useState("");
     const [siguienteHora, setSiguienteHora] = useState("");
@@ -17,21 +17,21 @@ const LensLogProcesos = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Obtener la meta específica de Lens Log
+                // Obtener la meta específica de Desbloqueo
                 const responseMetas = await clienteAxios.get('/metas/metas-manuales');
-                const metasLensLog = responseMetas.data.registros.filter(registro => registro.name.includes('LENS LOG'));
-                const sumaMetas = metasLensLog.reduce((acc, curr) => acc + curr.meta, 0);
-                console.log("Suma de metas (Lens Log):", sumaMetas);
+                const metasDesbloqueo = responseMetas.data.registros.filter(registro => registro.name.includes('DEBLOCKING'));
+                const sumaMetas = metasDesbloqueo.reduce((acc, curr) => acc + curr.meta, 0);
+                console.log("Suma de metas (Desbloqueo):", sumaMetas);
 
                 // Obtener registros del día actual
                 const responseRegistros = await clienteAxios.get('/manual/manual/actualdia');
                 console.log("Registros obtenidos:", responseRegistros.data.registros);
 
-                // Filtrar solo los registros que contienen "LENS LOG" en el campo `name`
+                // Filtrar solo los registros que contienen "DEBLOCKING" en el campo `name`
                 const registros = responseRegistros.data.registros.filter(registro => {
-                    return registro.name.includes('LENS LOG');
+                    return registro.name.includes('DEBLOCKING');
                 });
-                console.log("Registros filtrados (LENS LOG):", registros);
+                console.log("Registros filtrados (DEBLOCKING):", registros);
 
                 // Filtrar registros entre las 06:30 y las 23:00
                 const horaInicio = new Date('1970/01/01 06:30:00');
@@ -61,6 +61,7 @@ const LensLogProcesos = () => {
                 const formattedLastHour = new Date('1970/01/01 ' + horaMasCercana);
                 setUltimaHora(`${formattedLastHour.getHours().toString().padStart(2, '0')}:${formattedLastHour.getMinutes().toString().padStart(2, '0')}`);
                 console.log("Última hora:", ultimaHora);
+
                 const horaFinal = new Date('1970/01/01 ' + horaMasCercana);
                 // Redondear la hora final a la media hora más cercana
                 horaFinal.setMinutes(horaFinal.getMinutes() + 30 - (horaFinal.getMinutes() % 30));
@@ -81,18 +82,22 @@ const LensLogProcesos = () => {
                 const horaVespertinoFin = new Date('1970/01/01 21:30:00');
                 const horaNocturnoInicio = new Date('1970/01/01 21:30:00');
                 const horaNocturnoFin = new Date('1970/01/01 23:59:59');
+
                 const hitsMatutino = registrosFiltrados.filter(registro => {
                     const horaRegistro = new Date('1970/01/01 ' + registro.hour);
                     return horaRegistro >= horaMatutinoInicio && horaRegistro < horaMatutinoFin;
                 }).reduce((acc, curr) => acc + parseInt(curr.hits, 10), 0);
+
                 const hitsVespertino = registrosFiltrados.filter(registro => {
                     const horaRegistro = new Date('1970/01/01 ' + registro.hour);
                     return horaRegistro >= horaVespertinoInicio && horaRegistro < horaVespertinoFin;
                 }).reduce((acc, curr) => acc + parseInt(curr.hits, 10), 0);
+
                 const hitsNocturno = registrosFiltrados.filter(registro => {
                     const horaRegistro = new Date('1970/01/01 ' + registro.hour);
                     return horaRegistro >= horaNocturnoInicio;
                 }).reduce((acc, curr) => acc + parseInt(curr.hits, 10), 0);
+
                 setHitsMatutino(hitsMatutino);
                 setHitsVespertino(hitsVespertino);
                 setHitsNocturno(hitsNocturno);
@@ -120,18 +125,16 @@ const LensLogProcesos = () => {
 
     return (
         <>
-            <Link className="link" to={'/procesos-horas'}>
+            <Link className="link" to={'/procesos-horas#desbloqueo'}>
                 <div className="procesos-2">
                     <div className="procesos-2__flex">
-                        <p className="procesos-2__p-azul">Surtido</p>
-                        <div className="procesos__campo-lenslog">
-                            <p className="procesos-2__p">Trabajos: <br /><span className={meta > totalHits ? `procesos__span-2 generadores__uncheck` : `procesos__span-2 generadores__check`}>{totalHits}</span></p>
-                            <p className="procesos-2__p">Meta: <br /><span className="procesos-2__span">{meta}</span></p>
-                            <p className="procesos-2__p">Último Registro: <br /><span className="procesos-2__span">{ultimaHora} - {siguienteHora}</span></p>
-                            <p className="procesos-2__p">Matutino: <br /><span className={getClassName(hitsMatutino, metaMatutino)}>{hitsMatutino}</span></p>
-                            <p className="procesos-2__p">Vespertino: <br /><span className={getClassName(hitsVespertino, metaVespertino)}>{hitsVespertino}</span></p>
-                            <p className="procesos-2__p">Nocturno: <br /><span className={getClassName(hitsNocturno, metaNocturno)}>{hitsNocturno}</span></p>
-                        </div>
+                        <p className="procesos-2__p-azul">Desbloqueo</p>
+                        <p className="procesos-2__p">Trabajos: <br /><span className={meta > totalHits ? `procesos__span-2 generadores__uncheck` : `procesos__span-2 generadores__check`}>{totalHits}</span></p>
+                        <p className="procesos-2__p">Meta: <br /><span className="procesos-2__span">{meta}</span></p>
+                        <p className="procesos-2__p">Último Registro: <br /><span className="procesos-2__span">{ultimaHora} - {siguienteHora}</span></p>
+                        <p className="procesos-2__p">Matutino: <br /><span className={getClassName(hitsMatutino, metaMatutino)}>{hitsMatutino}</span></p>
+                        <p className="procesos-2__p">Vespertino: <br /><span className={getClassName(hitsVespertino, metaVespertino)}>{hitsVespertino}</span></p>
+                        <p className="procesos-2__p">Nocturno: <br /><span className={getClassName(hitsNocturno, metaNocturno)}>{hitsNocturno}</span></p>
                     </div>
                 </div>
             </Link>
@@ -139,4 +142,4 @@ const LensLogProcesos = () => {
     );
 };
 
-export default LensLogProcesos;
+export default DesbloqueoProcesos;

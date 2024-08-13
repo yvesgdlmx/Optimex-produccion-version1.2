@@ -3,7 +3,7 @@ import clienteAxios from "../config/clienteAxios";
 import { Link, useLocation } from "react-router-dom";
 import formatearHora from "../helpers/formatearHora";
 
-const EngraverHora = () => {
+const DesblockingHora = () => {
     const [registros, setRegistros] = useState([]);
     const [meta, setMeta] = useState(0);
     const [totalesPorTurno, setTotalesPorTurno] = useState({
@@ -11,22 +11,26 @@ const EngraverHora = () => {
         vespertino: 0,
         nocturno: 0
     });
+
     const location = useLocation();
 
     useEffect(() => {
         const obtenerMeta = async () => {
-            const { data } = await clienteAxios(`/metas/metas-engravers`);
-            const sumaMetas = data.registros.reduce((acc, registro) => acc + registro.meta, 0);
-            setMeta(sumaMetas);
+            const { data } = await clienteAxios(`/metas/metas-manuales`);
+            const metaDesblocking = data.registros.find(registro => registro.name === '19 DEBLOCKING');
+            if (metaDesblocking) {
+                setMeta(metaDesblocking.meta);
+            }
         };
         obtenerMeta();
     }, []);
 
     useEffect(() => {
         const obtenerRegistros = async () => {
-            const { data } = await clienteAxios(`/engraver/engraver/actualdia`);
+            const { data } = await clienteAxios(`/manual/manual/actualdia`);
+            const registrosDesblocking = data.registros.filter(registro => registro.name.includes('DEBLOCKING'));
             // Filtrar los registros que están entre las 06:30 y las 23:00
-            const registrosFiltrados = data.registros.filter(registro => {
+            const registrosFiltrados = registrosDesblocking.filter(registro => {
                 const [hora, minuto] = registro.hour.split(':').map(Number);
                 const minutosTotales = hora * 60 + minuto;
                 return minutosTotales >= 390 && minutosTotales < 1380; // 06:30 = 390 minutos, 23:00 = 1380 minutos
@@ -103,6 +107,7 @@ const EngraverHora = () => {
     const hitsPorHora = agruparHitsPorHora();
     const horasOrdenadas = Object.keys(hitsPorHora).sort().reverse();
     const filaGenerados = horasOrdenadas.map((hora) => hitsPorHora[hora]);
+
     const formatearHoraSinSegundos = (hora) => {
         return hora.slice(0, 5); // Esto eliminará los segundos de la hora
     };
@@ -123,6 +128,11 @@ const EngraverHora = () => {
     const horaActual = obtenerHoraActual();
 
     // Calcular metas ajustadas para cada turno
+    const metaMatutinoAjustada = calcularMetaPorHorasTranscurridas("06:30", horaActual, meta);
+    const metaVespertinoAjustada = calcularMetaPorHorasTranscurridas("14:30", horaActual, meta);
+    const metaNocturnoAjustada = calcularMetaPorHorasTranscurridas("19:30", horaActual, meta);
+
+    // Ajustar las metas para que cuenten al menos una hora al inicio de cada turno
     const ajustarMetaPorTurno = (horaInicio, horaActual, metaPorHora) => {
         const horasTranscurridas = Math.max(1, calcularHorasTranscurridas(horaInicio, horaActual));
         return horasTranscurridas * metaPorHora;
@@ -134,7 +144,7 @@ const EngraverHora = () => {
 
     return (
         <>
-            <div className="generado-hora" id="engravers">
+            <div className="generado-hora" id="desbloqueo">
                 <table className="tabla">
                     <thead className="tabla__thead">
                         <tr className="tabla__tr">
@@ -146,10 +156,10 @@ const EngraverHora = () => {
                     </thead>
                     <tbody>
                         <tr className="tabla__tr">
-                            <Link to={'/engravers-horas'} className="link__tabla">
+                            <Link to={'/desblocking-horas'} className="link__tabla">
                                 <div className="tabla__th-flex">
                                     <img src="./img/ver.png" alt="imagen-ver" className="tabla__ver" />
-                                    <td className="tabla__td position">Engraver <br/> <span className="tabla__td-span">Meta: <span className="tabla__span-meta">{meta}</span></span></td>
+                                    <td className="tabla__td position">Desbloqueo <br/> <span className="tabla__td-span">Meta: <span className="tabla__span-meta">{meta}</span></span></td>
                                 </div>
                             </Link>
                             {filaGenerados.map((generado, index) => (
@@ -174,4 +184,4 @@ const EngraverHora = () => {
     );
 };
 
-export default EngraverHora;
+export default DesblockingHora;

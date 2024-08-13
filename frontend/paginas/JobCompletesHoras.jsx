@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import clienteAxios from "../config/clienteAxios";
+import Navegacion from "../components/Navegacion";
 
 const JobCompletesHoras = () => {
   useEffect(() => {
@@ -24,15 +25,16 @@ const JobCompletesHoras = () => {
     const cargarDatos = async () => {
       try {
         const responseMetas = await clienteAxios('/metas/metas-manuales');
-        const metasLensLog = responseMetas.data.registros.filter(meta => meta.name.includes('JOB COMPLETE'));
-        const sumaMetas = metasLensLog.reduce((acc, meta) => acc + meta.meta, 0);
+        const metasJobComplete = responseMetas.data.registros.filter(meta => meta.name.includes('JOB COMPLETE'));
+        const sumaMetas = metasJobComplete.reduce((acc, meta) => acc + meta.meta, 0);
         setMeta(sumaMetas);
 
         const responseRegistros = await clienteAxios('/manual/manual/actualdia');
         const dataRegistros = responseRegistros.data.registros || [];
         const registrosFiltrados = dataRegistros.filter(registro => {
-          const hora = parseInt(registro.hour.split(":")[0], 10);
-          return (hora > 5 && hora < 23) && registro.name.includes('JOB COMPLETE');
+          const [hora, minuto] = registro.hour.split(':').map(Number);
+          const minutosTotales = hora * 60 + minuto;
+          return minutosTotales >= 390 && minutosTotales < 1380 && registro.name.includes('JOB COMPLETE'); // 06:30 = 390 minutos, 23:00 = 1380 minutos
         });
 
         const horas = new Set();
@@ -48,7 +50,6 @@ const JobCompletesHoras = () => {
           const horaFinal = (parseInt(horaInicial, 10) + 1) % 24;
           return `${horaInicial}:${minutos} - ${horaFinal.toString().padStart(2, '0')}:${minutos}`;
         });
-
         setHorasUnicas(horasConFormato);
         setTotalesAcumulados(totalAcumulado);
         setRegistros(registrosFiltrados);
@@ -84,7 +85,7 @@ const JobCompletesHoras = () => {
       const minutosTotales = hora * 60 + minuto;
       if (minutosTotales >= 390 && minutosTotales < 870) { // 06:30 - 14:30
         totales.matutino += registro.hits;
-      } else if (minutosTotales >= 870 && minutosTotales < 1290) { // 14:30 - 21:30
+      } else if (minutosTotales >= 870 && minutosTotales < 1170) { // 14:30 - 19:30
         totales.vespertino += registro.hits;
       } else if (minutosTotales >= 1170 && minutosTotales < 1380) { // 19:30 - 23:00
         totales.nocturno += registro.hits;
@@ -93,18 +94,13 @@ const JobCompletesHoras = () => {
     setTotalesPorTurno(totales);
   };
 
-  const hitsPorHora = agruparHitsPorHora();
-  const horasOrdenadas = Object.keys(hitsPorHora).sort().reverse();
-  const filaGenerados = horasOrdenadas.map((hora) => hitsPorHora[hora]);
-
-  const formatearHoraSinSegundos = (hora) => {
-    return hora.slice(0, 5); // Esto eliminará los segundos de la hora
-  };
-
-  const calcularRangoHoras = (horaInicio) => {
-    const horaInicioFormateada = formatearHoraSinSegundos(horaInicio);
-    const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + 60 * 60 * 1000).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
-    return `${horaInicioFormateada} - ${horaFin}`;
+  const calcularHorasTranscurridasDesde = (horaInicio) => {
+    const ahora = new Date();
+    const inicio = new Date();
+    inicio.setHours(horaInicio, 30, 0, 0);
+    const diferenciaMilisegundos = ahora - inicio;
+    const diferenciaHoras = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60)); // Convertir milisegundos a horas completas
+    return diferenciaHoras;
   };
 
   const sumaHitsPorHora = horasUnicas.map(hora => {
@@ -114,7 +110,20 @@ const JobCompletesHoras = () => {
   });
 
   const metaPorHora = meta;
+
   const claseSumaTotalAcumulados = totalesAcumulados >= (meta * horasUnicas.length) ? "generadores__check" : "generadores__uncheck";
+
+  const horasTranscurridasMatutino = calcularHorasTranscurridasDesde(6);
+  const metaAcumuladaMatutino = meta * (horasTranscurridasMatutino > 0 ? horasTranscurridasMatutino : 1);
+  const claseTotalMatutino = (totalesPorTurno.matutino >= metaAcumuladaMatutino && totalesPorTurno.matutino > 0) ? "generadores__check" : "generadores__uncheck";
+
+  const horasTranscurridasVespertino = calcularHorasTranscurridasDesde(14);
+  const metaAcumuladaVespertino = meta * (horasTranscurridasVespertino > 0 ? horasTranscurridasVespertino : 1);
+  const claseTotalVespertino = (totalesPorTurno.vespertino >= metaAcumuladaVespertino && totalesPorTurno.vespertino > 0) ? "generadores__check" : "generadores__uncheck";
+
+  const horasTranscurridasNocturno = calcularHorasTranscurridasDesde(19);
+  const metaAcumuladaNocturno = meta * (horasTranscurridasNocturno > 0 ? horasTranscurridasNocturno : 1);
+  const claseTotalNocturno = (totalesPorTurno.nocturno >= metaAcumuladaNocturno && totalesPorTurno.nocturno > 0) ? "generadores__check" : "generadores__uncheck";
 
   return (
     <>
@@ -126,7 +135,8 @@ const JobCompletesHoras = () => {
           </button>
         </Link>
       </div>
-      <h1 className="heading2">Job Complete</h1>
+      <Navegacion/>
+      <h1 className="heading2">Producción</h1>
       <div>
         <table className="a-tabla__table">
           <thead className="a-tabla__thead">
@@ -141,7 +151,7 @@ const JobCompletesHoras = () => {
           </thead>
           <tbody className="a-tabla__tbody">
             <tr className="a-tabla__tr-body">
-              <td className="a-tabla__td-body">Job-Complete</td>
+              <td className="a-tabla__td-body">Producción</td>
               <td className={`a-tabla__td-body ${claseSumaTotalAcumulados}`}>{totalesAcumulados}</td>
               <td className="a-tabla__td-body">{meta || 'No definida'}</td>
               {horasUnicas.map((hora, idx) => {
@@ -171,13 +181,13 @@ const JobCompletesHoras = () => {
       </div>
       <div className='tabla__div'>
         <div className='tabla__campo position-rela-2'>
-          <p className='tabla__p'>Total Matutino: <span className='tabla__span'>{totalesPorTurno.matutino}</span></p>
+          <p className='tabla__p'>Total Matutino: <span className={`tabla__span ${claseTotalMatutino}`}>{totalesPorTurno.matutino}</span></p>
         </div>
         <div className='tabla__campo position-rela-2'>
-          <p className='tabla__p'>Total Vespertino: <span className='tabla__span'>{totalesPorTurno.vespertino}</span></p>
+          <p className='tabla__p'>Total Vespertino: <span className={`tabla__span ${claseTotalVespertino}`}>{totalesPorTurno.vespertino}</span></p>
         </div>
         <div className='tabla__campo position-rela-2'>
-          <p className='tabla__p'>Total Nocturno: <span className='tabla__span'>{totalesPorTurno.nocturno}</span></p>
+          <p className='tabla__p'>Total Nocturno: <span className={`tabla__span ${claseTotalNocturno}`}>{totalesPorTurno.nocturno}</span></p>
         </div>
       </div>
     </>
