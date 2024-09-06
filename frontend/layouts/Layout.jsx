@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import useAuth from '../hooks/useAuth'; // Asegúrate de ajustar la ruta según tu estructura de carpetas
+import Header_mobile from '../components/mobile/Header_mobile';
 
 const Layout = () => {
   const location = useLocation();

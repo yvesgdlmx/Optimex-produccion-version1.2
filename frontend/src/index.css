@@ -343,6 +343,7 @@ a {
   width: calc(100vw - 205px); /* Ancho del main es el 100% menos el ancho del sidebar */
 }
 
+
 .main__contenido {
   padding: 2rem;
 }
@@ -638,6 +639,7 @@ a {
   transition: transform 0.3s ease-in-out;
 }
 
+
 .procesos-2:hover {
   transform: scale(1.03);
 }
@@ -659,6 +661,10 @@ a {
   font-weight: bold;
   font-size: 1.2rem;
   color: var(--AzulOscuro);
+}
+
+.procesos-2__p-azul-mobile {
+  display: none;
 }
 
 
@@ -716,6 +722,7 @@ a {
   color: var(--GrisOcuro);
 }
 
+
 .procesos__p-2 {
   text-align: center;
   font-size: 1.1rem;
@@ -765,6 +772,20 @@ a {
   gap: 3rem;
 }
 
+.procesos__campo-desbloqueo {
+  position: relative;
+  right: .5rem;
+  display: flex;
+  gap: 2rem;
+}
+
+.procesos__campo-ar {
+  position: relative;
+  left: 5.2rem;
+  display: flex;
+  gap: 3rem;
+}
+
 .procesos__campo-terminados {
   position: relative;
   right: .5rem;
@@ -778,6 +799,7 @@ a {
   display: flex;
   gap: 3rem;
 }
+
 
 .procesos__campo-manuales {
   position: relative;
@@ -799,15 +821,6 @@ a {
   display: flex;
   gap: 3rem;
 }
-
-.procesos__campo-ar {
-  position: relative;
-  left: 5.2rem;
-  display: flex;
-  gap: 3rem;
-}
-
-
 
 /* Generado-hora */
 

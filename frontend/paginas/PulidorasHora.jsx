@@ -27,6 +27,7 @@ const PulidorasHoras = () => {
     "255 POLISHR 1",
     "256 POLISHR 2",
     "257 POLISHR 3",
+    "258 POLISHR 4",
     "259 POLISHR 5",
     "260 POLISHR 6",
     "262 POLISHR 8",

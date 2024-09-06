@@ -10,6 +10,7 @@ import LensLogProcesos from '../components/LensLogProcesos';
 import JobCompleteProcesos from '../components/JobCompleteProcesos';
 import DesbloqueoProcesos from '../components/DesbloqueoProcesos';
 import ARProcesos from '../components/ARProcesos';
+import Procesos__mobile from '../components/mobile/Procesos__mobile';
 
 const Procesos = () => {
   useEffect(() => {
@@ -24,16 +25,16 @@ const Procesos = () => {
     <>
       <h1 className="heading">Procesos</h1>
       <p className="procesos__p-2">Visualiza los procesos, trabajos y metas de las estaciones.</p>
-      <LensLogProcesos/>
-      <TalladosProcesos />
-      <GeneradoresProcesos />
-      <PulidosProcesos />
-      <EngraversProcesos />
-      <DesbloqueoProcesos/>
-      <ARProcesos/>
-      <TerminadosProcesos />
-      <BiseladosProcesos />
-      <JobCompleteProcesos/>
+        <LensLogProcesos/>
+        <TalladosProcesos />
+        <GeneradoresProcesos />
+        <PulidosProcesos />
+        <EngraversProcesos />
+        <DesbloqueoProcesos/>
+        <ARProcesos/>
+        <TerminadosProcesos />
+        <BiseladosProcesos />
+        <JobCompleteProcesos/>
     </>
   );
 }
